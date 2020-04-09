@@ -4,7 +4,7 @@ void	check_headers_offset(struct s_woody *woody) {
 	if (woody->ehdr.e_phoff + woody->ehdr.e_phentsize * woody->ehdr.e_phnum > (size_t)woody->bin_st.st_size \
 		|| woody->ehdr.e_shoff + woody->ehdr.e_shentsize * woody->ehdr.e_shnum > (size_t)woody->bin_st.st_size)
 	{
-		dprintf(STDERR_FILENO, "%s: corrupted ELF file\n", woody->woody_name);
+		ERROR("corrupted ELF file");
 		exit_clean(woody, EXIT_FAILURE);
 	}
 }
@@ -26,15 +26,15 @@ uint16_t	get_index_section_with_name(struct s_woody *woody, char *section_name) 
 	for (uint16_t i = 0; i < woody->ehdr.e_shnum; i++) {
 		read_section_header(woody, i, &tmp);
 		if (woody->shstrtab.sh_offset > (size_t)woody->bin_st.st_size) {
-			dprintf(STDERR_FILENO, "%s: corrupted ELF file (wrong shstrtab.sh_offset)\n", woody->woody_name);
+			ERROR("corrupted ELF file (wrong shstrtab.sh_offset)");
 			exit_clean(woody, EXIT_FAILURE);
 		}
-		end_of_str = memchr(woody->bin_map + woody->shstrtab.sh_offset, 0, (size_t)woody->bin_st.st_size - woody->shstrtab.sh_offset);
+		end_of_str = ft_memchr(woody->bin_map + woody->shstrtab.sh_offset, 0, (size_t)woody->bin_st.st_size - woody->shstrtab.sh_offset);
 		if (!end_of_str) {
-			dprintf(STDERR_FILENO, "%s: corrupted ELF file (wrong sh_name offset)\n", woody->woody_name);
+			ERROR("corrupted ELF file (wrong sh_name offset)");
 			exit_clean(woody, EXIT_FAILURE);
 		}
-		if (strcmp(section_name, woody->bin_map + woody->shstrtab.sh_offset + tmp.sh_name) == 0)
+		if (ft_strcmp(section_name, woody->bin_map + woody->shstrtab.sh_offset + tmp.sh_name) == 0)
 			return (i);
 	}
 	return (-1);
@@ -87,21 +87,21 @@ void		insert_section_after_bss(struct s_woody *woody) {
 
 	index_shdr_bss = get_index_section_with_name(woody, ".bss");
 	if (index_shdr_bss == (uint16_t)-1) {
-		dprintf(STDERR_FILENO, "%s: .bss section not found\n", woody->woody_name);
+		ERROR(".bss section not found");
 		exit_clean(woody, EXIT_FAILURE);
 	}
 	read_section_header(woody, index_shdr_bss, &shdr_bss);
 
 	index_phdr_bss = get_index_segment_containing_section(woody, &shdr_bss);
 	if (index_phdr_bss == (uint16_t)-1) {
-		dprintf(STDERR_FILENO, "%s: .bss section not mapped (?)\n", woody->woody_name);
+		ERROR(".bss section not mapped (?)");
 		exit_clean(woody, EXIT_FAILURE);
 	}
 	read_program_header(woody, index_phdr_bss, &phdr_bss);
 
 	index_shdr_last = get_index_last_shdr_in_phdr_bss(woody, index_shdr_bss, &phdr_bss);
 	if (index_shdr_last == (uint16_t)-1) {
-		dprintf(STDERR_FILENO, "%s: last section of phdr bss not found\n", woody->woody_name);
+		ERROR("last section of phdr bss not found");
 		exit_clean(woody, EXIT_FAILURE);
 	}
 	read_section_header(woody, index_shdr_last, &shdr_last);
@@ -113,13 +113,13 @@ void		insert_section_after_bss(struct s_woody *woody) {
 
 	index_shdr_text = get_index_section_with_name(woody, ".text");
 	if (index_shdr_text == (uint16_t)-1) {
-		dprintf(STDERR_FILENO, "%s: .text section not found\n", woody->woody_name);
+		ERROR(".text section not found");
 		exit_clean(woody, EXIT_FAILURE);
 	}
 	read_section_header(woody, index_shdr_text, &shdr_text);
 	// Check if old entrypoint + size .text are valid
 	if (shdr_text.sh_offset + shdr_text.sh_size > (size_t)woody->bin_st.st_size) {
-		dprintf(STDERR_FILENO, "%s: corrupted binary (wrong .text section size)\n", woody->woody_name);
+		ERROR("corrupted binary (wrong .text section size)");
 		exit_clean(woody, EXIT_FAILURE);
 	}
 

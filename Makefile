@@ -26,10 +26,16 @@ HEXDUMP	=	/usr/bin/hexdump
 
 OBJ = $(patsubst %.c, $(OPATH)/%.o, $(SRC))
 
-CFLAGS = -Wall -Wextra -Werror -g #-fsanitize=address
+PAGE_SIZE= $(shell getconf PAGE_SIZE)
+
+CFLAGS = -Wall -Wextra -Werror -fpic -nostdlib -fno-stack-protector -DPAGE_SIZE=$(PAGE_SIZE) #-fsanitize=address
 
 ifeq ($(with-asm),y)
 	WITH-ASM:= with-asm
+endif
+
+ifeq ($(DEBUG),y)
+	CFLAGS+= -DDEBUG=true
 endif
 
 ROOT  	=	$(shell /bin/pwd)
@@ -38,22 +44,27 @@ CPATH 	=	$(ROOT)/srcs
 HPATH 	=	-I $(ROOT)/includes -I $(LIBFT)/includes
 
 SRC =	famine.c \
-	debug.c \
 	elf.c \
 	elf_read.c \
 	elf_write.c \
 	elf_modify.c \
-	elf_save.c
+	elf_save.c \
+	tools.c
 
-ASMPATH		= $(ROOT)/asm
-ASM_SRC		= $(ASMPATH)/unpacker.asm
-ASM_OBJ		= $(ASMPATH)/unpacker.o
-ASM_BYTECODE	= $(ASMPATH)/bytecode
+
+ASM_OBJ 	= $(patsubst %.s, $(ASM_OPATH)/%.o, $(ASM_SRC))
+ASM_OPATH 	=	$(ROOT)/objs/asm
+ASM_CPATH 	=	$(ROOT)/srcs/asm
+
+ASM_SRC =	unpacker.s \
+		syscall.s
+
+
+OBJ_DIR		= $(OPATH) $(ASM_OPATH)
 
 COMPILE	= no
 
 OS	:= $(shell uname -s)
-
 ifeq ($(OS),Darwin)
 	NPROCS:=$(shell sysctl -n hw.ncpu)
 else
@@ -83,33 +94,33 @@ define PRINT_STATUS
 endef
 
 .PHONY: all clean fclean re lib-clean lib-update
-.SILENT: $(NAME) $(OPATH) $(ASM_OBJ) $(OPATH)/%.o clean fclean re
+.SILENT: $(NAME) $(OBJ_DIR) $(ASM_OPATH) $(OPATH)/%.o clean fclean re
 
 all: $(NAME)
 
-$(ASM_OBJ):
-	$(NASM) -f elf64 $(ASM_SRC) -o $(ASM_OBJ)
-	$(OBJCOPY) -O binary -j .text $(ASM_OBJ) $(ASM_BYTECODE)
-
-$(NAME): $(ASM_OBJ) $(OPATH) $(OBJ)
+$(NAME): $(OBJ_DIR) $(ASM_OBJ) $(OBJ)
 	$(if $(filter $(COMPILE),yes),echo ']')
 	printf $(PROJECT)": Building $@ ... "
-	$(CC) -o $@ $(CFLAGS) $(OBJ) $(LPATH) $(HPATH) $(ASM_OBJ)
+	$(CC) -o $@ $(CFLAGS) $(OBJ) $(ASM_OBJ) $(LPATH) $(HPATH)
 	$(call PRINT_STATUS,DONE,SUCCESS)
 
-$(OPATH)/%.o: $(CPATH)/%.c | $(PRE_CHECK_LIB)
+$(ASM_OPATH)/%.o: $(ASM_CPATH)/%.s
 	$(if $(filter $(COMPILE),no),@printf $(PROJECT)': Files compiling [')
 	$(eval COMPILE := yes)
-	@$(CC) $(CFLAGS) -c $< -o $@ $(HPATH) -DBYTECODE=\"`$(HEXDUMP) -v -e '"\\\\x" 1/1 "%02X"' $(ASM_BYTECODE)`\"
+	@$(NASM) -f elf64 $< -o $@
 	@$(call PRINT_GREEN,.)
 
-$(OPATH):
-	echo $(PROJECT)": Creation of objects directory"
+$(OPATH)/%.o: $(CPATH)/%.c
+	$(if $(filter $(COMPILE),no),@printf $(PROJECT)': Files compiling [')
+	$(eval COMPILE := yes)
+	@$(CC) $(CFLAGS) -c $< -o $@ $(HPATH)
+	@$(call PRINT_GREEN,.)
+
+$(OBJ_DIR):
 	$(MKDIR) $@
 
 clean:
 	$(RM) -Rf $(OPATH)
-	$(RM) -f $(ASM_OBJ)
 	echo $(PROJECT)": Objects cleaned "
 	printf $(PROJECT)": $@ rule "
 	$(call PRINT_STATUS,DONE,SUCCESS)

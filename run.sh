@@ -10,4 +10,4 @@ if [[ "$(docker images -q famine 2> /dev/null)" == "" ]]; then
 	fi
 fi
 
-docker run -it --mount type=bind,source="$SCRIPT_PATH",target=/root/famine famine
+docker run --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -it --mount type=bind,source="$SCRIPT_PATH",target=/root/famine famine

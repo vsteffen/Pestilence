@@ -45,7 +45,7 @@ void	modify_phdr_text(struct s_woody *woody, Elf64_Shdr *shdr_text) {
 
 	index_phdr_text = get_index_segment_containing_section(woody, shdr_text);
 	if (index_phdr_text == (uint16_t)-1) {
-		dprintf(STDERR_FILENO, "%s: .bss section not mapped (?)\n", woody->woody_name);
+		ERROR(".bss section not mapped (?)");
 		exit_clean(woody, EXIT_FAILURE);
 	}
 

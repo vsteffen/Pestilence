@@ -2,18 +2,18 @@
 
 void	read_elf_header(struct s_woody *woody) {
 	if ((size_t)woody->bin_st.st_size < sizeof(Elf64_Ehdr)) {
-		dprintf(STDERR_FILENO, "%s: not an ELF file (file too small to contain ELF header)\n", woody->woody_name);
+		ERROR("not an ELF file (file too small to contain ELF header)");
 		exit_clean(woody, EXIT_FAILURE);
 	}
-	woody->ehdr = *(Elf64_Ehdr *)woody->bin_map;
+	ft_memcpy(&woody->ehdr, woody->bin_map, sizeof(Elf64_Ehdr));
 
 	if (*(uint32_t *)woody->ehdr.e_ident != *(uint32_t *)ELFMAG) {
-		dprintf(STDERR_FILENO, "%s: not an ELF file (wrong magic number)\n", woody->woody_name);
+		ERROR("not an ELF file (wrong magic number)");
 		exit_clean(woody, EXIT_FAILURE);
 	}
 
 	if (woody->ehdr.e_ident[EI_CLASS] != ELFCLASS64) {
-		dprintf(STDERR_FILENO, "%s: ELF Class not supported\n", woody->woody_name);
+		ERROR("ELF Class not supported");
 		exit_clean(woody, EXIT_FAILURE);
 	}
 
@@ -36,7 +36,7 @@ void	read_elf_header(struct s_woody *woody) {
 	}
 
 	if (woody->ehdr.e_type != ET_EXEC && woody->ehdr.e_type != ET_DYN) {
-		dprintf(STDERR_FILENO, "%s: wrong ELF type\n", woody->woody_name);
+		ERROR("wrong ELF type");
 		exit_clean(woody, EXIT_FAILURE);
 	}
 
@@ -58,7 +58,8 @@ void	read_elf_header(struct s_woody *woody) {
 }
 
 void	read_program_header(struct s_woody *woody, uint16_t index, Elf64_Phdr *phdr) {
-	*phdr = *(Elf64_Phdr *)(woody->bin_map + woody->ehdr.e_phoff + woody->ehdr.e_phentsize * index);
+	ft_memcpy(phdr, (woody->bin_map + woody->ehdr.e_phoff + woody->ehdr.e_phentsize * index), sizeof(Elf64_Phdr));
+	// *phdr = *(Elf64_Phdr *)(woody->bin_map + woody->ehdr.e_phoff + woody->ehdr.e_phentsize * index);
 	if (woody->reverse_endian) {
 		phdr->p_type	= BSWAP32(phdr->p_type);
 		phdr->p_flags	= BSWAP32(phdr->p_flags);
@@ -72,7 +73,8 @@ void	read_program_header(struct s_woody *woody, uint16_t index, Elf64_Phdr *phdr
 }
 
 void	read_section_header(struct s_woody *woody, uint16_t index, Elf64_Shdr *shdr) {
-	*shdr = *(Elf64_Shdr *)(woody->bin_map + woody->ehdr.e_shoff + woody->ehdr.e_shentsize * index);
+	ft_memcpy(shdr, (woody->bin_map + woody->ehdr.e_shoff + woody->ehdr.e_shentsize * index), sizeof(Elf64_Shdr));
+	// *shdr = *(Elf64_Shdr *)(woody->bin_map + woody->ehdr.e_shoff + woody->ehdr.e_shentsize * index);
 	if (woody->reverse_endian) {
 		shdr->sh_name		= BSWAP32(shdr->sh_name);
 		shdr->sh_type		= BSWAP32(shdr->sh_type);
