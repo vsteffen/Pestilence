@@ -7,10 +7,20 @@
 # define STR(x) STR_IMPL_(x)
 
 # ifdef	DEBUG
-#  define ERROR_STR_SYS(x)	__FILE__ ":" STR(__LINE__) ": syscall " x " failed\n"
-#  define ERROR_STR(x)		__FILE__ ":" STR(__LINE__) ": " x "\n"
-#  define ERROR_SYS(x)		({ syscall_wrapper(__NR_write, STDERR_FILENO, ERROR_STR_SYS(x), sizeof(ERROR_STR_SYS(x)) - 1); })
-#  define ERROR(x)		({ syscall_wrapper(__NR_write, STDERR_FILENO, ERROR_STR(x), sizeof(ERROR_STR(x)) - 1); })
+#  define ERROR_STR_SYS		((char []){'S','y','s','c','a','l','l',' ','f','a','i','l','e','d',':',' ','\0'})
+#  define ERROR_STR		((char []){'E','r','r','o','r',':',' ','\0'})
+#  define ERROR_STR_NL		((char []){'\n','\0'})
+#  define ERROR_SYS(x)		({ \
+					syscall_wrapper(__NR_write, STDERR_FILENO, ERROR_STR_SYS, sizeof(ERROR_STR_SYS) - 1); \
+					syscall_wrapper(__NR_write, STDERR_FILENO, x, sizeof(x) - 1); \
+					syscall_wrapper(__NR_write, STDERR_FILENO, ERROR_STR_NL, sizeof(ERROR_STR_NL) - 1); \
+				})
+#  define ERROR(x)		({ \
+					syscall_wrapper(__NR_write, STDERR_FILENO, ERROR_STR, sizeof(ERROR_STR) - 1); \
+					syscall_wrapper(__NR_write, STDERR_FILENO, x, sizeof(x) - 1); \
+					syscall_wrapper(__NR_write, STDERR_FILENO, ERROR_STR_NL, sizeof(ERROR_STR_NL) - 1); \
+				})
+
 # else
 #  define ERROR_SYS(x)		do { } while(0)
 #  define ERROR(x)		do { } while(0)

@@ -41,16 +41,15 @@ endif
 ROOT  	=	$(shell /bin/pwd)
 OPATH 	=	$(ROOT)/objs
 CPATH 	=	$(ROOT)/srcs
-HPATH 	=	-I $(ROOT)/includes -I $(LIBFT)/includes
+HPATH 	=	-I $(ROOT)/includes
 
-SRC =	famine.c \
-	elf.c \
+SRC =	elf.c \
 	elf_read.c \
 	elf_write.c \
 	elf_modify.c \
 	elf_save.c \
-	tools.c
-
+	tools.c \
+	famine.c \
 
 ASM_OBJ 	= $(patsubst %.s, $(ASM_OPATH)/%.o, $(ASM_SRC))
 ASM_OPATH 	=	$(ROOT)/objs/asm
@@ -101,7 +100,7 @@ all: $(NAME)
 $(NAME): $(OBJ_DIR) $(ASM_OBJ) $(OBJ)
 	$(if $(filter $(COMPILE),yes),echo ']')
 	printf $(PROJECT)": Building $@ ... "
-	$(CC) -o $@ $(CFLAGS) $(OBJ) $(ASM_OBJ) $(LPATH) $(HPATH)
+	$(CC) -o $@ $(CFLAGS) $(ASM_OBJ) $(OBJ) $(HPATH)
 	$(call PRINT_STATUS,DONE,SUCCESS)
 
 $(ASM_OPATH)/%.o: $(ASM_CPATH)/%.s

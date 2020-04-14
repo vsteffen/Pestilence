@@ -4,7 +4,7 @@ void	check_headers_offset(struct s_woody *woody) {
 	if (woody->ehdr.e_phoff + woody->ehdr.e_phentsize * woody->ehdr.e_phnum > (size_t)woody->bin_st.st_size \
 		|| woody->ehdr.e_shoff + woody->ehdr.e_shentsize * woody->ehdr.e_shnum > (size_t)woody->bin_st.st_size)
 	{
-		ERROR("corrupted ELF file");
+		ERROR(((char []){'c','o','r','r','u','p','t','e','d',' ','E','L','F',' ','f','i','l','e','\0'}));
 		exit_clean(woody, EXIT_FAILURE);
 	}
 }
@@ -26,12 +26,12 @@ uint16_t	get_index_section_with_name(struct s_woody *woody, char *section_name) 
 	for (uint16_t i = 0; i < woody->ehdr.e_shnum; i++) {
 		read_section_header(woody, i, &tmp);
 		if (woody->shstrtab.sh_offset > (size_t)woody->bin_st.st_size) {
-			ERROR("corrupted ELF file (wrong shstrtab.sh_offset)");
+			ERROR(((char []){'c','o','r','r','u','p','t','e','d',' ','E','L','F',' ','f','i','l','e',' ','(','w','r','o','n','g',' ','s','h','s','t','r','t','a','b','.','s','h','_','o','f','f','s','e','t',')','\0'}));
 			exit_clean(woody, EXIT_FAILURE);
 		}
 		end_of_str = ft_memchr(woody->bin_map + woody->shstrtab.sh_offset, 0, (size_t)woody->bin_st.st_size - woody->shstrtab.sh_offset);
 		if (!end_of_str) {
-			ERROR("corrupted ELF file (wrong sh_name offset)");
+			ERROR(((char []){'c','o','r','r','u','p','t','e','d',' ','E','L','F',' ','f','i','l','e',' ','(','w','r','o','n','g',' ','s','h','_','n','a','m','e',' ','o','f','f','s','e','t',')','\0'}));
 			exit_clean(woody, EXIT_FAILURE);
 		}
 		if (ft_strcmp(section_name, woody->bin_map + woody->shstrtab.sh_offset + tmp.sh_name) == 0)
@@ -85,23 +85,23 @@ void		insert_section_after_bss(struct s_woody *woody) {
 	uint16_t	index_phdr_bss;
 	uint16_t	index_shdr_last;
 
-	index_shdr_bss = get_index_section_with_name(woody, ".bss");
+	index_shdr_bss = get_index_section_with_name(woody, ((char []){'.','b','s','s','\0'}));
 	if (index_shdr_bss == (uint16_t)-1) {
-		ERROR(".bss section not found");
+		ERROR(((char []){'.','b','s','s',' ','s','e','c','t','i','o','n',' ','n','o','t',' ','f','o','u','n','d','\0'}));
 		exit_clean(woody, EXIT_FAILURE);
 	}
 	read_section_header(woody, index_shdr_bss, &shdr_bss);
 
 	index_phdr_bss = get_index_segment_containing_section(woody, &shdr_bss);
 	if (index_phdr_bss == (uint16_t)-1) {
-		ERROR(".bss section not mapped (?)");
+		ERROR(((char []){'.','b','s','s',' ','s','e','c','t','i','o','n',' ','n','o','t',' ','m','a','p','p','e','d',' ','(','?',')','\0'}));
 		exit_clean(woody, EXIT_FAILURE);
 	}
 	read_program_header(woody, index_phdr_bss, &phdr_bss);
 
 	index_shdr_last = get_index_last_shdr_in_phdr_bss(woody, index_shdr_bss, &phdr_bss);
 	if (index_shdr_last == (uint16_t)-1) {
-		ERROR("last section of phdr bss not found");
+		ERROR(((char []){'l','a','s','t',' ','s','e','c','t','i','o','n',' ','o','f',' ','p','h','d','r',' ','b','s','s',' ','n','o','t',' ','f','o','u','n','d','\0'}));
 		exit_clean(woody, EXIT_FAILURE);
 	}
 	read_section_header(woody, index_shdr_last, &shdr_last);
@@ -111,15 +111,15 @@ void		insert_section_after_bss(struct s_woody *woody) {
 	else
 		woody->new_section_and_padding_size = BYTECODE_SIZE + woody->key.length;
 
-	index_shdr_text = get_index_section_with_name(woody, ".text");
+	index_shdr_text = get_index_section_with_name(woody, ((char []){'.','t','e','x','t','\0'}));
 	if (index_shdr_text == (uint16_t)-1) {
-		ERROR(".text section not found");
+		ERROR(((char []){'.','t','e','x','t',' ','s','e','c','t','i','o','n',' ','n','o','t',' ','f','o','u','n','d','\0'}));
 		exit_clean(woody, EXIT_FAILURE);
 	}
 	read_section_header(woody, index_shdr_text, &shdr_text);
 	// Check if old entrypoint + size .text are valid
 	if (shdr_text.sh_offset + shdr_text.sh_size > (size_t)woody->bin_st.st_size) {
-		ERROR("corrupted binary (wrong .text section size)");
+		ERROR(((char []){'c','o','r','r','u','p','t','e','d',' ','b','i','n','a','r','y',' ','(','w','r','o','n','g',' ','.','t','e','x','t',' ','s','e','c','t','i','o','n',' ','s','i','z','e',')','\0'}));
 		exit_clean(woody, EXIT_FAILURE);
 	}
 
@@ -133,7 +133,7 @@ void		insert_section_after_bss(struct s_woody *woody) {
 	modify_phdr_text(woody, &shdr_text);
 	modify_shdr_pushed_by_new_section(woody, index_shdr_last);
 
-	xor_cipher(woody->key.raw, woody->key.length, woody->bin_map + shdr_text.sh_offset, shdr_text.sh_size);
+	// xor_cipher(woody->key.raw, woody->key.length, woody->bin_map + shdr_text.sh_offset, shdr_text.sh_size);
 
 	save_new_elf_file(woody, &shdr_last, index_shdr_last);
 }

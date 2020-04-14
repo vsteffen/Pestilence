@@ -1,8 +1,11 @@
 global xor_cipher
+global woody_mod
+
+extern woody_mod_c_entry
 
 section .text
 
-woody:
+woody_mod:
 	pushfq
 	push	rdi
 	push	rsi
@@ -14,7 +17,7 @@ woody:
 xor_cipher_params:
 	lea	rdi, [rel woody_str_end + 2]
 	mov	rsi, 0xBBBBBBBBBBBBBBBB
-	lea	rdx, [rel woody - 0x22222201]
+	lea	rdx, [rel woody_mod - 0x22222201]
 	mov	rcx, 0xCCCCCCCCCCCCCCCC
 	call	xor_cipher
 

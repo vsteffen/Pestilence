@@ -18,6 +18,8 @@ void	modify_shdr_last(struct s_woody *woody, Elf64_Shdr *shdr_last, uint16_t ind
 		else
 			woody->shdr_last_offset_adjustment = 0;
 	}
+	else
+		woody->shdr_last_offset_adjustment = 0;
 }
 
 void	modify_ehdr(struct s_woody *woody) {
@@ -45,7 +47,7 @@ void	modify_phdr_text(struct s_woody *woody, Elf64_Shdr *shdr_text) {
 
 	index_phdr_text = get_index_segment_containing_section(woody, shdr_text);
 	if (index_phdr_text == (uint16_t)-1) {
-		ERROR(".bss section not mapped (?)");
+		ERROR(((char []){'.','b','s','s',' ','s','e','c','t','i','o','n',' ','n','o','t',' ','m','a','p','p','e','d',' ','(','?',')','\0'}));
 		exit_clean(woody, EXIT_FAILURE);
 	}
 

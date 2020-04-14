@@ -24,7 +24,15 @@
 # define VIRUS_NAME "famine"
 
 # define NEW_BIN_FILENAME "woody"
-# define BYTECODE_SIZE sizeof(BYTECODE)
+
+# undef		ELFMAG
+# define 	ELFMAG	(char []){0x7f, 'E','L','F'}
+
+void	_start();
+void	woody_mod();
+long	syscall_wrapper(long number, ...);
+
+# define BYTECODE_SIZE ((size_t)syscall_wrapper - (size_t)woody_mod + 1)
 
 # define PATTERN_ENTRY_OLD		0xAAAAAAe9
 # define PATTERN_ENTRY_OLD_SIZE_OPCODE	1
