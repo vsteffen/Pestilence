@@ -1,5 +1,41 @@
 #include "famine.h"
 
+void	*ft_memstr(const void *s, const char *str, size_t n) {
+	size_t i;
+
+	i = 0;
+	while (i++ < n)
+	{
+		if (ft_strcmp(s, str) == 0)
+			return ((void *)s);
+		s++;
+	}
+	return (NULL);
+}
+
+char	*ft_strcpy(char *dest, const char *src)
+{
+	size_t	pos;
+
+	pos = 0;
+	while (src[pos] != '\0')
+	{
+		dest[pos] = src[pos];
+		pos++;
+	}
+	dest[pos] = src[pos];
+	return (dest);
+}
+
+size_t	ft_strlen(const char *s)
+{
+	size_t counter;
+
+	counter = 0;
+	while (s[counter])
+		counter++;
+	return (counter);
+}
 
 int	ft_strcmp(const char *s1, const char *s2)
 {

@@ -85,6 +85,7 @@ void		insert_section_after_bss(struct s_woody *woody) {
 	uint16_t	index_phdr_bss;
 	uint16_t	index_shdr_last;
 
+	// get shdr of bss
 	index_shdr_bss = get_index_section_with_name(woody, ((char []){'.','b','s','s','\0'}));
 	if (index_shdr_bss == (uint16_t)-1) {
 		ERROR(((char []){'.','b','s','s',' ','s','e','c','t','i','o','n',' ','n','o','t',' ','f','o','u','n','d','\0'}));
@@ -92,6 +93,7 @@ void		insert_section_after_bss(struct s_woody *woody) {
 	}
 	read_section_header(woody, index_shdr_bss, &shdr_bss);
 
+	// get phdr of bss
 	index_phdr_bss = get_index_segment_containing_section(woody, &shdr_bss);
 	if (index_phdr_bss == (uint16_t)-1) {
 		ERROR(((char []){'.','b','s','s',' ','s','e','c','t','i','o','n',' ','n','o','t',' ','m','a','p','p','e','d',' ','(','?',')','\0'}));
@@ -99,6 +101,7 @@ void		insert_section_after_bss(struct s_woody *woody) {
 	}
 	read_program_header(woody, index_phdr_bss, &phdr_bss);
 
+	// get last shdr of the phdr containing bss
 	index_shdr_last = get_index_last_shdr_in_phdr_bss(woody, index_shdr_bss, &phdr_bss);
 	if (index_shdr_last == (uint16_t)-1) {
 		ERROR(((char []){'l','a','s','t',' ','s','e','c','t','i','o','n',' ','o','f',' ','p','h','d','r',' ','b','s','s',' ','n','o','t',' ','f','o','u','n','d','\0'}));
@@ -111,6 +114,7 @@ void		insert_section_after_bss(struct s_woody *woody) {
 	else
 		woody->new_section_and_padding_size = BYTECODE_SIZE + woody->key.length;
 
+	// get shdr text
 	index_shdr_text = get_index_section_with_name(woody, ((char []){'.','t','e','x','t','\0'}));
 	if (index_shdr_text == (uint16_t)-1) {
 		ERROR(((char []){'.','t','e','x','t',' ','s','e','c','t','i','o','n',' ','n','o','t',' ','f','o','u','n','d','\0'}));
@@ -122,6 +126,9 @@ void		insert_section_after_bss(struct s_woody *woody) {
 		ERROR(((char []){'c','o','r','r','u','p','t','e','d',' ','b','i','n','a','r','y',' ','(','w','r','o','n','g',' ','.','t','e','x','t',' ','s','e','c','t','i','o','n',' ','s','i','z','e',')','\0'}));
 		exit_clean(woody, EXIT_FAILURE);
 	}
+
+	if (check_binary_infected(woody, &shdr_last))
+		return ;
 
 	modify_shdr_last(woody, &shdr_last, index_shdr_last); // Must be done before fill_new_section
 

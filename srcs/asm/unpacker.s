@@ -1,7 +1,7 @@
 global xor_cipher
 global woody_mod
 
-extern woody_mod_c_entry
+extern woody_mod_c
 
 section .text
 
@@ -74,5 +74,5 @@ xor_cipher_end:
 
 align 8
 
-woody_str	db "....WOODY....", 0x0a, 0
+woody_str	db "Famine version 1.0 (c)oded by vsteffen", 0x0a, 0
 woody_str_end	db 0x0

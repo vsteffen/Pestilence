@@ -49,6 +49,7 @@ SRC =	elf.c \
 	elf_modify.c \
 	elf_save.c \
 	tools.c \
+	woody_mod.c \
 	famine.c \
 
 ASM_OBJ 	= $(patsubst %.s, $(ASM_OPATH)/%.o, $(ASM_SRC))
