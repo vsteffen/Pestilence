@@ -1,6 +1,6 @@
 #include "famine.h"
 
-void	modify_shdr_last(struct s_woody *woody, Elf64_Shdr *shdr_last, uint16_t index_shdr_last) {
+bool	modify_shdr_last(struct s_woody *woody, Elf64_Shdr *shdr_last, uint16_t index_shdr_last) {
 	Elf64_Shdr shdr_prev_last;
 	Elf64_Shdr *fptr_shdr_last;
 	size_t shdr_last_offset;
@@ -8,7 +8,8 @@ void	modify_shdr_last(struct s_woody *woody, Elf64_Shdr *shdr_last, uint16_t ind
 	if (shdr_last->sh_type == SHT_NOBITS) {
 		fptr_shdr_last = (Elf64_Shdr *)(woody->bin_map + woody->ehdr.e_shoff + woody->ehdr.e_shentsize * index_shdr_last);
 		write_uint32(woody, &fptr_shdr_last->sh_type, SHT_PROGBITS);
-		read_section_header(woody, index_shdr_last - 1, &shdr_prev_last);
+		if (!read_section_header(woody, index_shdr_last - 1, &shdr_prev_last))
+			return false;
 		shdr_last_offset = shdr_prev_last.sh_offset + (shdr_last->sh_addr - shdr_prev_last.sh_addr);
 		if (shdr_last_offset > shdr_last->sh_offset) {
 			write_uint64(woody, &fptr_shdr_last->sh_offset, shdr_last_offset);
@@ -20,6 +21,7 @@ void	modify_shdr_last(struct s_woody *woody, Elf64_Shdr *shdr_last, uint16_t ind
 	}
 	else
 		woody->shdr_last_offset_adjustment = 0;
+	return true;
 }
 
 void	modify_ehdr(struct s_woody *woody) {
@@ -56,12 +58,13 @@ bool	modify_phdr_text(struct s_woody *woody, Elf64_Shdr *shdr_text) {
 	return true;
 }
 
-void	modify_shdr_pushed_by_new_section(struct s_woody *woody, uint16_t index_shdr_last) {
+bool	modify_shdr_pushed_by_new_section(struct s_woody *woody, uint16_t index_shdr_last) {
 	Elf64_Shdr tmp;
 	Elf64_Shdr *fptr_shdr_tmp;
 
 	for (uint16_t index = index_shdr_last + 1; index < woody->ehdr.e_shnum; index++) {
-		read_section_header(woody, index, &tmp);
+		if (!read_section_header(woody, index, &tmp))
+			return false;
 		if (tmp.sh_type == SHT_NOBITS)
 			continue ;
 		fptr_shdr_tmp = (Elf64_Shdr *)(woody->bin_map + woody->ehdr.e_shoff + woody->ehdr.e_shentsize * index);
@@ -70,4 +73,5 @@ void	modify_shdr_pushed_by_new_section(struct s_woody *woody, uint16_t index_shd
 		}
 		write_uint64(woody, &fptr_shdr_tmp->sh_offset, tmp.sh_offset + woody->new_section_and_padding_size + woody->shdr_last_offset_adjustment);
 	}
+	return true;
 }

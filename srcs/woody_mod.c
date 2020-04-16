@@ -64,15 +64,16 @@ void	woody_mod_c(char *target) {
 		return ;
 
 	if (!read_elf_header(&famine.woody))
-		clean_woody(&famine.woody);
+		return clean_woody(&famine.woody);
 
 	if (!check_headers_offset(&famine.woody))
-		clean_woody(&famine.woody);
+		return clean_woody(&famine.woody);
 
-	get_shstrtab(&famine.woody);
+	if(!get_shstrtab(&famine.woody))
+		return clean_woody(&famine.woody);
 
 	if (!gen_random_key(&famine.woody.key))
-		clean_woody(&famine.woody);
+		return clean_woody(&famine.woody);
 
 	insert_section_after_bss(&famine.woody);
 

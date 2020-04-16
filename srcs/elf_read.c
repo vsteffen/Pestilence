@@ -58,9 +58,12 @@ bool	read_elf_header(struct s_woody *woody) {
 	return true;
 }
 
-void	read_program_header(struct s_woody *woody, uint16_t index, Elf64_Phdr *phdr) {
+bool	read_program_header(struct s_woody *woody, uint16_t index, Elf64_Phdr *phdr) {
+	if (index >= woody->ehdr.e_phentsize) {
+		ERROR(((char []){'w','r','o','n','g',' ','i','n','d','e','x',' ','i','n',' ','r','e','a','d','_','p','r','o','g','r','a','m','_','h','e','a','d','e','r','\0'}));
+		return false;
+	}
 	ft_memcpy(phdr, (woody->bin_map + woody->ehdr.e_phoff + woody->ehdr.e_phentsize * index), sizeof(Elf64_Phdr));
-	// *phdr = *(Elf64_Phdr *)(woody->bin_map + woody->ehdr.e_phoff + woody->ehdr.e_phentsize * index);
 	if (woody->reverse_endian) {
 		phdr->p_type	= BSWAP32(phdr->p_type);
 		phdr->p_flags	= BSWAP32(phdr->p_flags);
@@ -71,11 +74,15 @@ void	read_program_header(struct s_woody *woody, uint16_t index, Elf64_Phdr *phdr
 		phdr->p_memsz	= BSWAP64(phdr->p_memsz);
 		phdr->p_align	= BSWAP64(phdr->p_align);
 	}
+	return true;
 }
 
-void	read_section_header(struct s_woody *woody, uint16_t index, Elf64_Shdr *shdr) {
+bool	read_section_header(struct s_woody *woody, uint16_t index, Elf64_Shdr *shdr) {
+	if (index >= woody->ehdr.e_shentsize) {
+		ERROR(((char []){'w','r','o','n','g',' ','i','n','d','e','x',' ','i','n',' ','r','e','a','d','_','s','e','c','t','i','o','n','_','h','e','a','d','e','r','\0'}));
+		return false;
+	}
 	ft_memcpy(shdr, (woody->bin_map + woody->ehdr.e_shoff + woody->ehdr.e_shentsize * index), sizeof(Elf64_Shdr));
-	// *shdr = *(Elf64_Shdr *)(woody->bin_map + woody->ehdr.e_shoff + woody->ehdr.e_shentsize * index);
 	if (woody->reverse_endian) {
 		shdr->sh_name		= BSWAP32(shdr->sh_name);
 		shdr->sh_type		= BSWAP32(shdr->sh_type);
@@ -88,4 +95,5 @@ void	read_section_header(struct s_woody *woody, uint16_t index, Elf64_Shdr *shdr
 		shdr->sh_addralign	= BSWAP64(shdr->sh_addralign);
 		shdr->sh_entsize	= BSWAP64(shdr->sh_entsize);
 	}
+	return true;
 }

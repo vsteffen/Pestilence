@@ -72,7 +72,8 @@ bool	save_new_section(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *shdr_la
 		ERROR(((char []){'.','t','e','x','t',' ','s','e','c','t','i','o','n',' ','n','o','t',' ','f','o','u','n','d','\0'}));
 		return false;
 	}
-	read_section_header(woody, index_shdr_text, &shdr_text);
+	if (!read_section_header(woody, index_shdr_text, &shdr_text))
+		return false;
 	addr_pattern = find_pattern64((void *)bytecode, BYTECODE_UNPACKER_SIZE, PATTERN_TEXT_SIZE, PATTERN_TEXT_SIZE_OPCODE);
 	if (!addr_pattern) {
 		ERROR(((char []){'.','t','e','x','t',' ','s','i','z','e',' ','p','a','t','t','e','r','n',' ','n','o','t',' ','f','o','u','n','d','\0'}));
