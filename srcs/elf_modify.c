@@ -37,22 +37,23 @@ void	modify_phdr_bss(struct s_woody *woody, Elf64_Phdr *phdr_bss, uint16_t index
 
 	fptr_phdr_bss = (Elf64_Phdr *)(woody->bin_map + woody->ehdr.e_phoff + woody->ehdr.e_phentsize * index_phdr_bss);
 	write_uint64(woody, &fptr_phdr_bss->p_filesz, phdr_bss->p_filesz + woody->new_section_and_padding_size + woody->shdr_last_offset_adjustment);
-	write_uint64(woody, &fptr_phdr_bss->p_memsz, phdr_bss->p_memsz + BYTECODE_SIZE + woody->key.length);
+	write_uint64(woody, &fptr_phdr_bss->p_memsz, phdr_bss->p_memsz + BYTECODE_SIZE);//+ woody->key.length);
 	write_uint32(woody, &fptr_phdr_bss->p_flags, PF_R | PF_W | PF_X);
 }
 
-void	modify_phdr_text(struct s_woody *woody, Elf64_Shdr *shdr_text) {
+bool	modify_phdr_text(struct s_woody *woody, Elf64_Shdr *shdr_text) {
 	Elf64_Phdr	*fptr_phdr_text;
 	uint16_t	index_phdr_text;
 
 	index_phdr_text = get_index_segment_containing_section(woody, shdr_text);
 	if (index_phdr_text == (uint16_t)-1) {
 		ERROR(((char []){'.','b','s','s',' ','s','e','c','t','i','o','n',' ','n','o','t',' ','m','a','p','p','e','d',' ','(','?',')','\0'}));
-		exit_clean(woody, EXIT_FAILURE);
+		return false;
 	}
 
 	fptr_phdr_text = (Elf64_Phdr *)(woody->bin_map + woody->ehdr.e_phoff + woody->ehdr.e_phentsize * index_phdr_text);
 	write_uint32(woody, &fptr_phdr_text->p_flags, PF_R | PF_W | PF_X);
+	return true;
 }
 
 void	modify_shdr_pushed_by_new_section(struct s_woody *woody, uint16_t index_shdr_last) {
