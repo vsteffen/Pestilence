@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE_NAME="famine"
+IMAGE_NAME="pestilence"
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 if [[ "$(docker images -q famine 2> /dev/null)" == "" ]]; then
@@ -10,4 +10,4 @@ if [[ "$(docker images -q famine 2> /dev/null)" == "" ]]; then
 	fi
 fi
 
-docker run --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -it --mount type=bind,source="$SCRIPT_PATH",target=/root/famine famine
+docker run --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -it --mount type=bind,source="$SCRIPT_PATH",target=/root/pestilence pestilence

@@ -1,4 +1,4 @@
-#include "famine.h"
+#include "pestilence.h"
 
 void	*ft_memstr(const void *s, const char *str, size_t n) {
 	size_t i;

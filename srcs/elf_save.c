@@ -1,4 +1,4 @@
-#include "famine.h"
+#include "pestilence.h"
 
 static void *find_pattern32(void *addr, size_t size, uint32_t pattern, uint8_t opcode_size) {
 	if (size < sizeof(pattern))

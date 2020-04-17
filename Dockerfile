@@ -8,6 +8,6 @@ RUN apt update \
 	&& apt install -y git vim man gcc clang make nasm gdb strace \
 	&& git clone https://github.com/longld/peda.git /root/peda \
 	&& echo "source /root/peda/peda.py" >> ~/.gdbinit \
-	&& mkdir /root/famine
+	&& mkdir /root/pestilence
 
-WORKDIR /root/famine
+WORKDIR /root/pestilence

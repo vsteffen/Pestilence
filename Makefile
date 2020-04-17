@@ -10,8 +10,8 @@
 #                                                                              #
 # **************************************************************************** #
 
-PROJECT	= famine
-NAME	= famine
+PROJECT	= pestilence
+NAME	= pestilence
 
 CC 	=	/usr/bin/clang
 RM 	=	/bin/rm

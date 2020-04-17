@@ -72,6 +72,6 @@ xor_cipher_end:
 
 align 8
 
-woody_str	db "Famine version 1.0 (c)oded by vsteffen", 0x0a, 0
+woody_str	db "Pestilence version 1.0 (c)oded by vsteffen", 0x0a, 0
 key_loc:	times KEY_SIZE db 0
 woody_mod_end	db 0x0

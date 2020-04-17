@@ -1,4 +1,4 @@
-#include "famine.h"
+#include "pestilence.h"
 
 bool	check_headers_offset(struct s_woody *woody) {
 	Elf64_Shdr	tmp_shdr;

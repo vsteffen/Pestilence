@@ -1,4 +1,4 @@
-#include "famine.h"
+#include "pestilence.h"
 
 void	write_uint16(struct s_woody *woody, uint16_t *addr, uint16_t value) {
 	if (woody->reverse_endian)

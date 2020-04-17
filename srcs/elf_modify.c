@@ -1,4 +1,4 @@
-#include "famine.h"
+#include "pestilence.h"
 
 bool	modify_shdr_last(struct s_woody *woody, Elf64_Shdr *shdr_last, uint16_t index_shdr_last) {
 	Elf64_Shdr shdr_prev_last;

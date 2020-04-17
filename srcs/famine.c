@@ -1,4 +1,4 @@
-#include "famine.h"
+#include "pestilence.h"
 
 bool	find_binaries(char *dirname) {
 	int	fd;

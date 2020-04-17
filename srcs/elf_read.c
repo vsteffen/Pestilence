@@ -1,4 +1,4 @@
-#include "famine.h"
+#include "pestilence.h"
 
 bool	read_elf_header(struct s_woody *woody) {
 	if ((size_t)woody->bin_st.st_size < sizeof(Elf64_Ehdr)) {

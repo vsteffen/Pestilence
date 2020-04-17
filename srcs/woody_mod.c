@@ -1,4 +1,4 @@
-#include "famine.h"
+#include "pestilence.h"
 
 void	clean_woody(struct s_woody *woody) {
 	if (syscall_wrapper(__NR_munmap, woody->bin_map, woody->bin_st.st_size + BYTECODE_SIZE) == -1)
