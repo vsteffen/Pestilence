@@ -1,5 +1,12 @@
 #include "pestilence.h"
 
+int	ft_isdigit(int c)
+{
+	if (48 <= c && c <= 57)
+		return (1);
+	return (0);
+}
+
 void	*ft_memstr(const void *s, const char *str, size_t n) {
 	size_t i;
 

