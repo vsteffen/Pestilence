@@ -2,6 +2,7 @@
 # define TOOLS_H
 
 # include <unistd.h>
+# include <stdint.h>
 
 # define STR_IMPL_(x) #x
 # define STR(x) STR_IMPL_(x)
@@ -44,6 +45,12 @@
 	| (((x) & 0x0000000000ff0000ull) << 24)	\
 	| (((x) & 0x000000000000ff00ull) << 40)	\
 	| (((x) & 0x00000000000000ffull) << 56))
+
+
+void	*find_pattern_uint8(void *addr, size_t size, uint8_t pattern, uint8_t jump_size);
+void	*find_pattern_uint16(void *addr, size_t size, uint16_t pattern, uint8_t jump_size);
+void	*find_pattern_uint32(void *addr, size_t size, uint32_t pattern, uint8_t jump_size);
+void	*find_pattern_uint64(void *addr, size_t size, uint64_t pattern, uint8_t jump_size);
 
 int	ft_isdigit(int c);
 void	*ft_memstr(const void *s, const char *str, size_t n);

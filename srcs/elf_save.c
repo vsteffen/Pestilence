@@ -1,25 +1,5 @@
 #include "pestilence.h"
 
-static void *find_pattern32(void *addr, size_t size, uint32_t pattern, uint8_t opcode_size) {
-	if (size < sizeof(pattern))
-		return (NULL);
-	for (size_t i = 0; i < size - sizeof(pattern); i++) {
-		if (*(uint32_t *)(addr + i) == pattern)
-			return (addr + i + opcode_size);
-	}
-	return (NULL);
-}
-
-static	void *find_pattern64(void *addr, size_t size, uint64_t pattern, uint8_t opcode_size) {
-	if (size < sizeof(pattern))
-		return (NULL);
-	for (size_t i = 0; i < size - sizeof(pattern); i++) {
-		if (*(uint64_t *)(addr + i) == pattern)
-			return (addr + i + opcode_size);
-	}
-	return (NULL);
-}
-
 bool	save_new_section(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *shdr_last) {
 	char *bytecode = woody->bin_map + woody->bin_st.st_size;
 
@@ -49,7 +29,7 @@ bool	save_new_section(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *shdr_la
 
 	void *addr_pattern;
 	// Write old entry
-	addr_pattern = find_pattern32((void *)bytecode, BYTECODE_UNPACKER_SIZE, PATTERN_ENTRY_OLD, PATTERN_ENTRY_OLD_SIZE_OPCODE);
+	addr_pattern = find_pattern_uint8((void *)bytecode, BYTECODE_UNPACKER_SIZE, PATTERN_ENTRY_OLD, PATTERN_ENTRY_OLD_SIZE_OPCODE);
 	if (!addr_pattern) {
 		ERROR(((char []){'o','l','d',' ','e','n','t','r','y',' ','p','a','t','t','e','r','n',' ','n','o','t',' ','f','o','u','n','d','\0'}));
 		return false;
@@ -57,7 +37,7 @@ bool	save_new_section(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *shdr_la
 	*(int32_t *)addr_pattern = woody->ehdr.e_entry - (woody->new_entry  + (size_t)(addr_pattern - (void *)bytecode) + sizeof(PATTERN_ENTRY_OLD));
 
 	// Write key size for xor_cipher
-	addr_pattern = find_pattern64((void *)bytecode, BYTECODE_UNPACKER_SIZE, PATTERN_KEY_SIZE, PATTERN_KEY_SIZE_OPCODE);
+	addr_pattern = find_pattern_uint16((void *)bytecode, BYTECODE_UNPACKER_SIZE, PATTERN_KEY_SIZE, PATTERN_KEY_SIZE_OPCODE);
 	if (!addr_pattern) {
 		ERROR(((char []){'k','e','y',' ','s','i','z','e',' ','p','a','t','t','e','r','n',' ','n','o','t',' ','f','o','u','n','d','\0'}));
 		return false;
@@ -74,7 +54,7 @@ bool	save_new_section(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *shdr_la
 	}
 	if (!read_section_header(woody, index_shdr_text, &shdr_text))
 		return false;
-	addr_pattern = find_pattern64((void *)bytecode, BYTECODE_UNPACKER_SIZE, PATTERN_TEXT_SIZE, PATTERN_TEXT_SIZE_OPCODE);
+	addr_pattern = find_pattern_uint16((void *)bytecode, BYTECODE_UNPACKER_SIZE, PATTERN_TEXT_SIZE, PATTERN_TEXT_SIZE_OPCODE);
 	if (!addr_pattern) {
 		ERROR(((char []){'.','t','e','x','t',' ','s','i','z','e',' ','p','a','t','t','e','r','n',' ','n','o','t',' ','f','o','u','n','d','\0'}));
 		return false;
@@ -98,22 +78,28 @@ bool	save_new_section(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *shdr_la
 	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	|            NEW SECTION            |
 	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+	+-----------------------------------+
 	|                                   |
-	|              padding              |
+	|       padding (if necessary)      |
 	|                                   |
-	|-----------------------------------|
+	|- - - - - - - - - - - - - - - - - -|
 	|                                   |
-	|  unpacker.s (with key at the end) |
+	| unpacker.s (sign/key at the end)  |
 	|                                   |
 	|-----------------------------------| <-----\
 	|                                   |       |
 	|             syscall.s             |       |
 	|                                   |       |
-	|-----------------------------------|       +----- encrypted part
+	|-----------------------------------|       +----- xor encrypted part
 	|                                   |       |
 	|    c functions (without _start)   |       |
 	|                                   |       |
-	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ <-----/
+	|- - - - - - - - - - - - - - - - - -| <-----/
+	|                                   |
+	|  _start (only in original binary) |
+	|                                   |
+	+-----------------------------------+
 */
 
 bool	save_new_shdr(struct s_woody *woody, int new_bin_fd, Elf64_Shdr *new_section) {

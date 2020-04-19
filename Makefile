@@ -28,7 +28,7 @@ OBJ = $(patsubst %.c, $(OPATH)/%.o, $(SRC))
 
 PAGE_SIZE= $(shell getconf PAGE_SIZE)
 
-CFLAGS = -Wall -Wextra -Werror -fpic -nostdlib -fno-stack-protector -DPAGE_SIZE=$(PAGE_SIZE) #-fsanitize=address
+CFLAGS = -Wall -Wextra -Werror -fpic -nostdlib -fno-stack-protector -DPAGE_SIZE=$(PAGE_SIZE)
 
 ifeq ($(with-asm),y)
 	WITH-ASM:= with-asm

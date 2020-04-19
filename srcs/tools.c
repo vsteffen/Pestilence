@@ -1,5 +1,45 @@
 #include "pestilence.h"
 
+void	*find_pattern_uint8(void *addr, size_t size, uint8_t pattern, uint8_t jump_size) {
+	if (size < sizeof(pattern))
+		return (NULL);
+	for (size_t i = 0; i < size - sizeof(pattern); i++) {
+		if (*(uint8_t *)(addr + i) == pattern)
+			return (addr + i + jump_size);
+	}
+	return (NULL);
+}
+
+void	*find_pattern_uint16(void *addr, size_t size, uint16_t pattern, uint8_t jump_size) {
+	if (size < sizeof(pattern))
+		return (NULL);
+	for (size_t i = 0; i < size - sizeof(pattern); i++) {
+		if (*(uint16_t *)(addr + i) == pattern)
+			return (addr + i + jump_size);
+	}
+	return (NULL);
+}
+
+void	*find_pattern_uint32(void *addr, size_t size, uint32_t pattern, uint8_t jump_size) {
+	if (size < sizeof(pattern))
+		return (NULL);
+	for (size_t i = 0; i < size - sizeof(pattern); i++) {
+		if (*(uint32_t *)(addr + i) == pattern)
+			return (addr + i + jump_size);
+	}
+	return (NULL);
+}
+
+void	*find_pattern_uint64(void *addr, size_t size, uint64_t pattern, uint8_t jump_size) {
+	if (size < sizeof(pattern))
+		return (NULL);
+	for (size_t i = 0; i < size - sizeof(pattern); i++) {
+		if (*(uint64_t *)(addr + i) == pattern)
+			return (addr + i + jump_size);
+	}
+	return (NULL);
+}
+
 int	ft_isdigit(int c)
 {
 	if (48 <= c && c <= 57)
