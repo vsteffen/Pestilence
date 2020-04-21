@@ -56,3 +56,4 @@ pestilence
 peda*
 core
 tests/*.log
+obfuscate_code_generated
