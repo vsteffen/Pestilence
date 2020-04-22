@@ -190,7 +190,7 @@ insert_fake_instructions() {
 			done
 			call_func_insert+=");"
 			func_proto=$(sed -n "${n_line_functions_protos}p" <<< "$functions_protos" )
-			func_proto=$(sed 's/\*/\\\*/' <<< "$func_proto" )
+			func_proto=$(sed 's/\*/\\\*/g' <<< "$func_proto" )
 			sed -i '/'"${func_proto}"'/a '"${call_func_insert}" $source_file
 			n_line_functions_protos=$(inc_var $n_line_functions_protos)
 		done <<< "$args_raw"

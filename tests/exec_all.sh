@@ -3,6 +3,10 @@
 SCRIPT=`realpath $0`
 SCRIPT_PATH=`dirname $SCRIPT`
 
+if ! [ -x "$(command -v "$SCRIPT_PATH/../pestilence")" ]; then
+	make re -C "$SCRIPT_PATH/.." DEBUG=y
+fi
+
 LOG=$SCRIPT_PATH/exec_all.log
 rm -rf $LOG
 touch $LOG
