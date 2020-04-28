@@ -159,8 +159,6 @@ bool		insert_section_after_bss(struct s_woody *woody) {
 
 	modify_ehdr(woody);
 	modify_phdr_bss(woody, &phdr_bss, index_phdr_bss);
-	if (!modify_phdr_text(woody, &shdr_text))
-		return false;
 	if (!modify_shdr_pushed_by_new_section(woody, index_shdr_last))
 		return false;
 
